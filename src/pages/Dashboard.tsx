@@ -1,137 +1,31 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SavedJobsList } from "@/components/dashboard/SavedJobsList";
+import { SavedSearchesList } from "@/components/dashboard/SavedSearchesList";
+import { useAuth } from "@/components/AuthProvider";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { 
-  Clock, 
-  Search, 
-  Bookmark, 
-  Settings, 
-  Bell, 
-  Download,
-  User,
-  CreditCard,
-  FileText,
-  Briefcase,
-  Building,
-  MapPin,
-  CalendarDays,
-  ExternalLink,
-  AlertCircle
-} from "lucide-react";
-
-// Mock saved searches data
-const savedSearches = [
-  {
-    id: 1,
-    title: "Software Engineer in Europe",
-    results: 28,
-    date: "2025-04-01",
-    params: {
-      jobTitle: "Software Engineer",
-      location: "Europe",
-      visaOnly: true,
-      remote: true,
-    },
-  },
-  {
-    id: 2,
-    title: "Data Scientist in Canada",
-    results: 15,
-    date: "2025-04-05",
-    params: {
-      jobTitle: "Data Scientist",
-      location: "Canada",
-      visaOnly: true,
-      remote: false,
-    },
-  },
-  {
-    id: 3,
-    title: "Frontend Developer in Australia",
-    results: 12,
-    date: "2025-04-10",
-    params: {
-      jobTitle: "Frontend Developer",
-      location: "Australia",
-      visaOnly: true,
-      remote: true,
-    },
-  },
-];
-
-// Mock saved jobs data
-const savedJobs = [
-  {
-    id: 1,
-    title: "Senior Frontend Developer",
-    company: "TechGlobal Inc.",
-    location: "Berlin, Germany",
-    date: "2025-03-28",
-    status: "Applied",
-    url: "#",
-  },
-  {
-    id: 2,
-    title: "Backend Engineer",
-    company: "DataSync Ltd",
-    location: "Amsterdam, Netherlands",
-    date: "2025-04-05",
-    status: "Saved",
-    url: "#",
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "InnovateTech",
-    location: "Stockholm, Sweden",
-    date: "2025-04-10",
-    status: "Interview",
-    url: "#",
-  },
-  {
-    id: 4,
-    title: "DevOps Engineer",
-    company: "CloudNet Systems",
-    location: "Toronto, Canada",
-    date: "2025-04-08",
-    status: "Saved",
-    url: "#",
-  },
-];
+import { Clock, Search, Bookmark, Bell, User, CreditCard, Settings } from "lucide-react";
 
 const Dashboard = () => {
   const [currentTab, setCurrentTab] = useState("overview");
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile, savedJobs, savedSearches, isLoading } = useDashboardData();
 
-  // Mock user data
-  const user = {
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    joinDate: "March 15, 2025",
-    subscription: {
-      plan: "Starter",
-      status: "Active",
-      nextBilling: "May 15, 2025",
-      searches: {
-        used: 8,
-        total: 20,
-      },
-    },
-  };
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
+
+  if (!user || isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -215,7 +109,7 @@ const Dashboard = () => {
                 {/* Overview Tab */}
                 <TabsContent value="overview" className="space-y-6 mt-0">
                   <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Welcome back, {user.name}</h1>
+                    <h1 className="text-2xl font-bold">Welcome back, {user.email}</h1>
                     <Button asChild>
                       <a href="/search">New Search</a>
                     </Button>
@@ -224,122 +118,59 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Subscription</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                          Subscription
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{user.subscription.plan}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Next billing: {user.subscription.nextBilling}</p>
+                        <div className="text-2xl font-bold">{profile.subscription_tier}</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Status: {profile.subscription_status}
+                        </p>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Searches Used</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                          Searches Used
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{user.subscription.searches.used}/{user.subscription.searches.total}</div>
+                        <div className="text-2xl font-bold">
+                          {profile.searches_used}/{profile.total_searches_allowed}
+                        </div>
                         <div className="w-full h-2 bg-muted rounded-full mt-2">
                           <div 
                             className="h-full bg-primary rounded-full" 
-                            style={{ width: `${(user.subscription.searches.used / user.subscription.searches.total) * 100}%` }}
+                            style={{ 
+                              width: `${(profile.searches_used / profile.total_searches_allowed) * 100}%` 
+                            }}
                           ></div>
                         </div>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Saved Jobs</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                          Saved Jobs
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{savedJobs.length}</div>
+                        <div className="text-2xl font-bold">{savedJobs?.length || 0}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {savedJobs.filter(job => job.status === "Applied").length} applied
+                          {savedJobs?.filter(job => job.status === "Applied").length || 0} applied
                         </p>
                       </CardContent>
                     </Card>
                   </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Saved Searches</CardTitle>
-                      <CardDescription>
-                        Your most recent job searches
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {savedSearches.slice(0, 3).map((search) => (
-                          <div 
-                            key={search.id} 
-                            className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors"
-                          >
-                            <div>
-                              <h3 className="font-medium">{search.title}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {search.results} results • {new Date(search.date).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <Button variant="ghost" asChild>
-                              <a href={`/search?id=${search.id}`}>View</a>
-                            </Button>
-                          </div>
-                        ))}
-                        <div className="pt-2">
-                          <Button variant="outline" size="sm" className="w-full" asChild>
-                            <a href="/searches">View All Searches</a>
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {savedSearches && savedSearches.length > 0 && (
+                    <SavedSearchesList searches={savedSearches} isCompact />
+                  )}
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Saved Jobs</CardTitle>
-                      <CardDescription>
-                        Jobs you've recently saved
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {savedJobs.slice(0, 3).map((job) => (
-                          <div 
-                            key={job.id} 
-                            className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors"
-                          >
-                            <div>
-                              <h3 className="font-medium">{job.title}</h3>
-                              <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                <Building className="h-3 w-3 mr-1" />
-                                <span className="mr-2">{job.company}</span>
-                                <MapPin className="h-3 w-3 mr-1" />
-                                <span>{job.location}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center">
-                              <span 
-                                className={`text-xs px-2 py-0.5 rounded-full mr-2
-                                  ${job.status === "Applied" ? "bg-primary/10 text-primary" : 
-                                    job.status === "Interview" ? "bg-accent/10 text-accent" : 
-                                    "bg-muted text-muted-foreground"}`}
-                              >
-                                {job.status}
-                              </span>
-                              <Button variant="ghost" size="sm" asChild>
-                                <a href={job.url} target="_blank" rel="noreferrer">
-                                  <ExternalLink className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                        <div className="pt-2">
-                          <Button variant="outline" size="sm" className="w-full" asChild>
-                            <a href="/jobs">View All Jobs</a>
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {savedJobs && savedJobs.length > 0 && (
+                    <SavedJobsList jobs={savedJobs} isCompact />
+                  )}
                 </TabsContent>
 
                 {/* Saved Searches Tab */}
