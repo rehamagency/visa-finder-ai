@@ -9,7 +9,247 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          searches_used: number | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          total_searches_allowed: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          searches_used?: number | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          total_searches_allowed?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          searches_used?: number | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          total_searches_allowed?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          company: string
+          date_posted: string | null
+          date_saved: string
+          description: string | null
+          id: string
+          job_title: string
+          job_type: string | null
+          location: string | null
+          notes: string | null
+          remote: boolean | null
+          url: string | null
+          user_id: string
+          visa_sponsored: boolean | null
+        }
+        Insert: {
+          company: string
+          date_posted?: string | null
+          date_saved?: string
+          description?: string | null
+          id?: string
+          job_title: string
+          job_type?: string | null
+          location?: string | null
+          notes?: string | null
+          remote?: boolean | null
+          url?: string | null
+          user_id: string
+          visa_sponsored?: boolean | null
+        }
+        Update: {
+          company?: string
+          date_posted?: string | null
+          date_saved?: string
+          description?: string | null
+          id?: string
+          job_title?: string
+          job_type?: string | null
+          location?: string | null
+          notes?: string | null
+          remote?: boolean | null
+          url?: string | null
+          user_id?: string
+          visa_sponsored?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_searches: {
+        Row: {
+          created_at: string
+          full_time: boolean | null
+          id: string
+          job_title: string | null
+          job_urls: string[] | null
+          last_run: string | null
+          location: string | null
+          name: string | null
+          part_time: boolean | null
+          remote: boolean | null
+          user_id: string
+          visa_only: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          full_time?: boolean | null
+          id?: string
+          job_title?: string | null
+          job_urls?: string[] | null
+          last_run?: string | null
+          location?: string | null
+          name?: string | null
+          part_time?: boolean | null
+          remote?: boolean | null
+          user_id: string
+          visa_only?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          full_time?: boolean | null
+          id?: string
+          job_title?: string | null
+          job_urls?: string[] | null
+          last_run?: string | null
+          location?: string | null
+          name?: string | null
+          part_time?: boolean | null
+          remote?: boolean | null
+          user_id?: string
+          visa_only?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_searches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_results: {
+        Row: {
+          company: string
+          date_found: string
+          date_posted: string | null
+          description: string | null
+          id: string
+          job_title: string
+          job_type: string | null
+          location: string | null
+          remote: boolean | null
+          search_id: string | null
+          url: string | null
+          user_id: string
+          visa_sponsored: boolean | null
+        }
+        Insert: {
+          company: string
+          date_found?: string
+          date_posted?: string | null
+          description?: string | null
+          id?: string
+          job_title: string
+          job_type?: string | null
+          location?: string | null
+          remote?: boolean | null
+          search_id?: string | null
+          url?: string | null
+          user_id: string
+          visa_sponsored?: boolean | null
+        }
+        Update: {
+          company?: string
+          date_found?: string
+          date_posted?: string | null
+          description?: string | null
+          id?: string
+          job_title?: string
+          job_type?: string | null
+          location?: string | null
+          remote?: boolean | null
+          search_id?: string | null
+          url?: string | null
+          user_id?: string
+          visa_sponsored?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_results_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "saved_searches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          features: Json
+          id: number
+          name: string
+          price_monthly: number
+          price_yearly: number
+          searches_per_month: number
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
+        }
+        Insert: {
+          features: Json
+          id?: number
+          name: string
+          price_monthly: number
+          price_yearly: number
+          searches_per_month: number
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Update: {
+          features?: Json
+          id?: number
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          searches_per_month?: number
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
