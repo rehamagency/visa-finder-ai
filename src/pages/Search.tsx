@@ -16,8 +16,12 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Search as SearchIcon, Plus, Trash2, Download, Briefcase, Building, MapPin, Globe, ExternalLink } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { useSaveSearch } from "@/hooks/useSaveSearch";
+import { useSaveJob } from "@/hooks/useSaveJob";
+import { toast } from "sonner";
 
-// Mock job data
+// Mock job data (will be replaced with actual API calls)
 const mockJobs = [
   {
     id: 1,
@@ -82,6 +86,10 @@ const mockJobs = [
 ];
 
 const Search = () => {
+  const { user } = useAuth();
+  const saveSearch = useSaveSearch();
+  const saveJob = useSaveJob();
+
   const [jobUrls, setJobUrls] = useState<string[]>([""]);
   const [jobTitle, setJobTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -108,13 +116,50 @@ const Search = () => {
   };
 
   const handleSearch = () => {
+    if (!jobTitle && !location && jobUrls.every(url => !url)) {
+      toast.error("Please enter at least a job title, location, or job URL");
+      return;
+    }
+
     setIsSearching(true);
+    
+    // Save search if user is logged in
+    if (user) {
+      saveSearch.mutate({
+        jobTitle,
+        location,
+        visaOnly,
+        remote,
+        fullTime,
+        partTime,
+        jobUrls: jobUrls.filter(url => url.trim() !== "")
+      });
+    }
     
     // Simulate API call with a timeout
     setTimeout(() => {
       setSearchResults(mockJobs);
       setIsSearching(false);
     }, 2000);
+  };
+
+  const handleSaveJob = (job: typeof mockJobs[0]) => {
+    if (!user) {
+      toast.error("Please log in to save jobs");
+      return;
+    }
+
+    saveJob.mutate({
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      description: job.description,
+      jobType: job.jobType,
+      visaSponsored: job.visaSponsored,
+      remote: job.remote,
+      url: job.url,
+      postedDate: job.postedDate
+    });
   };
 
   return (
@@ -252,6 +297,12 @@ const Search = () => {
                     </>
                   )}
                 </Button>
+
+                {!user && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    <a href="/auth" className="text-primary hover:underline">Sign in</a> to save your searches and get job alerts
+                  </p>
+                )}
               </div>
             </div>
             
@@ -326,7 +377,13 @@ const Search = () => {
                             Posted: {new Date(job.postedDate).toLocaleDateString()}
                           </div>
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">Save</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleSaveJob(job)}
+                            >
+                              Save
+                            </Button>
                             <Button size="sm" asChild>
                               <a href={job.url} target="_blank" rel="noreferrer">
                                 Apply
@@ -396,7 +453,13 @@ const Search = () => {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <div className="flex justify-end space-x-2">
-                                  <Button variant="ghost" size="sm">Save</Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleSaveJob(job)}
+                                  >
+                                    Save
+                                  </Button>
                                   <Button size="sm" asChild>
                                     <a href={job.url} target="_blank" rel="noreferrer">
                                       Apply

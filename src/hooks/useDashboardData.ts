@@ -63,7 +63,17 @@ export const useDashboardData = () => {
         .order("date_saved", { ascending: false });
 
       if (error) throw error;
-      return data as SavedJob[];
+      
+      // Transform the data to match our expected SavedJob type
+      return data.map(job => ({
+        id: job.id,
+        job_title: job.job_title,
+        company: job.company,
+        location: job.location || "",
+        status: "Saved" as "Saved" | "Applied" | "Interview", // Default status
+        date_saved: job.date_saved,
+        url: job.url || "#"
+      })) as SavedJob[];
     },
     enabled: !!user,
   });
@@ -78,7 +88,22 @@ export const useDashboardData = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as SavedSearch[];
+      
+      // Transform the data to match our expected SavedSearch type
+      return data.map(search => ({
+        id: search.id,
+        name: search.name || search.job_title || "Untitled Search",
+        job_title: search.job_title || "",
+        location: search.location || "",
+        results: 0, // We'll update this when implementing search results
+        date: search.created_at,
+        params: {
+          jobTitle: search.job_title || "",
+          location: search.location || "",
+          visaOnly: search.visa_only || false,
+          remote: search.remote || false
+        }
+      })) as SavedSearch[];
     },
     enabled: !!user,
   });

@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,10 @@ import { useAuth } from "@/components/AuthProvider";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Clock, Search, Bookmark, Bell, User, CreditCard, Settings } from "lucide-react";
+import { 
+  Clock, Search, Bookmark, Bell, User, CreditCard, Settings, 
+  Download, AlertCircle, FileText, ExternalLink
+} from "lucide-react";
 
 const Dashboard = () => {
   const [currentTab, setCurrentTab] = useState("overview");
@@ -26,6 +30,21 @@ const Dashboard = () => {
   if (!user || isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
+
+  // Mock user subscription data for display purposes until we implement Stripe
+  const mockUserData = {
+    name: user.email?.split('@')[0] || 'User',
+    joinDate: new Date().toLocaleDateString(),
+    subscription: {
+      plan: profile?.subscription_tier || 'Free',
+      status: profile?.subscription_status || 'Active',
+      nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+      searches: {
+        used: profile?.searches_used || 0,
+        total: profile?.total_searches_allowed || 3
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -123,9 +142,9 @@ const Dashboard = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{profile.subscription_tier}</div>
+                        <div className="text-2xl font-bold">{profile?.subscription_tier || 'Free'}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Status: {profile.subscription_status}
+                          Status: {profile?.subscription_status || 'Active'}
                         </p>
                       </CardContent>
                     </Card>
@@ -137,13 +156,13 @@ const Dashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">
-                          {profile.searches_used}/{profile.total_searches_allowed}
+                          {profile?.searches_used || 0}/{profile?.total_searches_allowed || 3}
                         </div>
                         <div className="w-full h-2 bg-muted rounded-full mt-2">
                           <div 
                             className="h-full bg-primary rounded-full" 
                             style={{ 
-                              width: `${(profile.searches_used / profile.total_searches_allowed) * 100}%` 
+                              width: `${((profile?.searches_used || 0) / (profile?.total_searches_allowed || 3)) * 100}%` 
                             }}
                           ></div>
                         </div>
@@ -185,48 +204,54 @@ const Dashboard = () => {
                   <Card>
                     <CardContent className="p-0">
                       <div className="divide-y divide-border">
-                        {savedSearches.map((search) => (
-                          <div 
-                            key={search.id} 
-                            className="p-4 hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-medium text-lg">{search.title}</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {search.results} results • Saved on {new Date(search.date).toLocaleDateString()}
-                                </p>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                                    {search.params.jobTitle}
-                                  </span>
-                                  <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                                    {search.params.location}
-                                  </span>
-                                  {search.params.visaOnly && (
+                        {savedSearches && savedSearches.length > 0 ? (
+                          savedSearches.map((search) => (
+                            <div 
+                              key={search.id} 
+                              className="p-4 hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-medium text-lg">{search.name}</h3>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {search.results} results • Saved on {new Date(search.date).toLocaleDateString()}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mt-2">
                                     <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                                      Visa sponsored
+                                      {search.params.jobTitle}
                                     </span>
-                                  )}
-                                  {search.params.remote && (
                                     <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                                      Remote
+                                      {search.params.location}
                                     </span>
-                                  )}
+                                    {search.params.visaOnly && (
+                                      <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                                        Visa sponsored
+                                      </span>
+                                    )}
+                                    {search.params.remote && (
+                                      <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                                        Remote
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <Button variant="outline" size="sm">
+                                    <Bell className="h-4 w-4 mr-2" />
+                                    Set Alert
+                                  </Button>
+                                  <Button size="sm" asChild>
+                                    <a href={`/search?id=${search.id}`}>View Results</a>
+                                  </Button>
                                 </div>
                               </div>
-                              <div className="flex space-x-2">
-                                <Button variant="outline" size="sm">
-                                  <Bell className="h-4 w-4 mr-2" />
-                                  Set Alert
-                                </Button>
-                                <Button size="sm" asChild>
-                                  <a href={`/search?id=${search.id}`}>View Results</a>
-                                </Button>
-                              </div>
                             </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center">
+                            <p className="text-muted-foreground">No saved searches found. Start by creating a new search.</p>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -244,54 +269,60 @@ const Dashboard = () => {
 
                   <Card>
                     <CardContent className="p-0">
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-border">
-                              <th className="text-left px-4 py-3 text-sm font-medium">Job Title</th>
-                              <th className="text-left px-4 py-3 text-sm font-medium">Company</th>
-                              <th className="text-left px-4 py-3 text-sm font-medium">Location</th>
-                              <th className="text-left px-4 py-3 text-sm font-medium">Added Date</th>
-                              <th className="text-left px-4 py-3 text-sm font-medium">Status</th>
-                              <th className="text-right px-4 py-3 text-sm font-medium">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {savedJobs.map((job) => (
-                              <tr key={job.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                                <td className="px-4 py-3">
-                                  <div className="font-medium">{job.title}</div>
-                                </td>
-                                <td className="px-4 py-3">{job.company}</td>
-                                <td className="px-4 py-3">{job.location}</td>
-                                <td className="px-4 py-3">{new Date(job.date).toLocaleDateString()}</td>
-                                <td className="px-4 py-3">
-                                  <span 
-                                    className={`text-xs px-2 py-0.5 rounded-full
-                                      ${job.status === "Applied" ? "bg-primary/10 text-primary" : 
-                                        job.status === "Interview" ? "bg-accent/10 text-accent" : 
-                                        "bg-muted text-muted-foreground"}`}
-                                  >
-                                    {job.status}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                  <div className="flex justify-end space-x-2">
-                                    <Button variant="ghost" size="sm">
-                                      <FileText className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" asChild>
-                                      <a href={job.url} target="_blank" rel="noreferrer">
-                                        <ExternalLink className="h-4 w-4" />
-                                      </a>
-                                    </Button>
-                                  </div>
-                                </td>
+                      {savedJobs && savedJobs.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b border-border">
+                                <th className="text-left px-4 py-3 text-sm font-medium">Job Title</th>
+                                <th className="text-left px-4 py-3 text-sm font-medium">Company</th>
+                                <th className="text-left px-4 py-3 text-sm font-medium">Location</th>
+                                <th className="text-left px-4 py-3 text-sm font-medium">Added Date</th>
+                                <th className="text-left px-4 py-3 text-sm font-medium">Status</th>
+                                <th className="text-right px-4 py-3 text-sm font-medium">Actions</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            </thead>
+                            <tbody>
+                              {savedJobs.map((job) => (
+                                <tr key={job.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                                  <td className="px-4 py-3">
+                                    <div className="font-medium">{job.job_title}</div>
+                                  </td>
+                                  <td className="px-4 py-3">{job.company}</td>
+                                  <td className="px-4 py-3">{job.location}</td>
+                                  <td className="px-4 py-3">{new Date(job.date_saved).toLocaleDateString()}</td>
+                                  <td className="px-4 py-3">
+                                    <span 
+                                      className={`text-xs px-2 py-0.5 rounded-full
+                                        ${job.status === "Applied" ? "bg-primary/10 text-primary" : 
+                                          job.status === "Interview" ? "bg-accent/10 text-accent" : 
+                                          "bg-muted text-muted-foreground"}`}
+                                    >
+                                      {job.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <div className="flex justify-end space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <FileText className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm" asChild>
+                                        <a href={job.url} target="_blank" rel="noreferrer">
+                                          <ExternalLink className="h-4 w-4" />
+                                        </a>
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="p-8 text-center">
+                          <p className="text-muted-foreground">No saved jobs found. Start by saving jobs from your search results.</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -337,7 +368,7 @@ const Dashboard = () => {
                             </label>
                             <input 
                               type="text" 
-                              value={user.name}
+                              value={mockUserData.name}
                               className="w-full bg-muted p-2 rounded-md"
                               readOnly
                             />
@@ -348,7 +379,7 @@ const Dashboard = () => {
                             </label>
                             <input 
                               type="email" 
-                              value={user.email}
+                              value={user.email || ''}
                               className="w-full bg-muted p-2 rounded-md"
                               readOnly
                             />
@@ -360,7 +391,7 @@ const Dashboard = () => {
                           </label>
                           <input 
                             type="text" 
-                            value={user.joinDate}
+                            value={mockUserData.joinDate}
                             className="w-full bg-muted p-2 rounded-md"
                             readOnly
                           />
@@ -439,9 +470,9 @@ const Dashboard = () => {
                       <div className="bg-muted/40 p-4 rounded-lg">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-bold text-xl">{user.subscription.plan}</h3>
+                            <h3 className="font-bold text-xl">{mockUserData.subscription.plan}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {user.subscription.status} • Renews on {user.subscription.nextBilling}
+                              {mockUserData.subscription.status} • Renews on {mockUserData.subscription.nextBilling}
                             </p>
                           </div>
                           <Button variant="outline">
@@ -454,17 +485,17 @@ const Dashboard = () => {
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm">Job Searches</span>
                             <span className="text-sm font-medium">
-                              {user.subscription.searches.used}/{user.subscription.searches.total}
+                              {mockUserData.subscription.searches.used}/{mockUserData.subscription.searches.total}
                             </span>
                           </div>
                           <div className="w-full h-2 bg-muted rounded-full">
                             <div 
                               className="h-full bg-primary rounded-full" 
-                              style={{ width: `${(user.subscription.searches.used / user.subscription.searches.total) * 100}%` }}
+                              style={{ width: `${(mockUserData.subscription.searches.used / mockUserData.subscription.searches.total) * 100}%` }}
                             ></div>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Resets on {user.subscription.nextBilling}
+                            Resets on {mockUserData.subscription.nextBilling}
                           </p>
                         </div>
                       </div>
