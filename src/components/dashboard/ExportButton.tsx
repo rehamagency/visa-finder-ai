@@ -1,11 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { exportJobsToCSV } from "@/utils/csvExport";
+import { exportJobsToCSV, SearchResult } from "@/utils/csvExport";
 import { SavedJob } from "@/hooks/useDashboardData";
 
 interface ExportButtonProps {
-  jobs: SavedJob[];
+  jobs: SavedJob[] | SearchResult[];
+  type?: 'saved' | 'search';
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
@@ -13,12 +14,13 @@ interface ExportButtonProps {
 
 export const ExportButton = ({ 
   jobs, 
+  type = 'saved',
   variant = "outline", 
   size = "sm",
   className = ""
 }: ExportButtonProps) => {
   const handleExport = () => {
-    exportJobsToCSV(jobs);
+    exportJobsToCSV(jobs, type);
   };
 
   return (

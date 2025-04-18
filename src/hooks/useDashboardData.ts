@@ -8,9 +8,10 @@ export interface SavedJob {
   job_title: string;
   company: string;
   location: string;
-  status: "Saved" | "Applied" | "Interview";
+  status: "Saved" | "Applied" | "Interview" | "Offer" | "Rejected";
   date_saved: string;
   url: string;
+  description?: string;
 }
 
 export interface SavedSearch {
@@ -70,9 +71,10 @@ export const useDashboardData = () => {
         job_title: job.job_title,
         company: job.company,
         location: job.location || "",
-        status: "Saved" as "Saved" | "Applied" | "Interview", // Default status
+        status: job.status || "Saved" as "Saved" | "Applied" | "Interview" | "Offer" | "Rejected",
         date_saved: job.date_saved,
-        url: job.url || "#"
+        url: job.url || "#",
+        description: job.description
       })) as SavedJob[];
     },
     enabled: !!user,
@@ -81,21 +83,37 @@ export const useDashboardData = () => {
   const { data: savedSearches, isLoading: isLoadingSavedSearches } = useQuery({
     queryKey: ["savedSearches", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: searches, error: searchesError } = await supabase
         .from("saved_searches")
         .select("*")
         .eq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (searchesError) throw searchesError;
+      
+      // Get result counts for each search
+      const searchIds = searches.map(search => search.id);
+      
+      const { data: resultCounts, error: countsError } = await supabase
+        .from("search_results")
+        .select("search_id, count")
+        .in("search_id", searchIds)
+        .groupBy("search_id");
+        
+      const resultsMap = new Map();
+      if (!countsError && resultCounts) {
+        resultCounts.forEach(count => {
+          resultsMap.set(count.search_id, parseInt(count.count));
+        });
+      }
       
       // Transform the data to match our expected SavedSearch type
-      return data.map(search => ({
+      return searches.map(search => ({
         id: search.id,
         name: search.name || search.job_title || "Untitled Search",
         job_title: search.job_title || "",
         location: search.location || "",
-        results: 0, // We'll update this when implementing search results
+        results: resultsMap.get(search.id) || 0,
         date: search.created_at,
         params: {
           jobTitle: search.job_title || "",

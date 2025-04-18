@@ -15,80 +15,19 @@ import {
 } from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Search as SearchIcon, Plus, Trash2, Download, Briefcase, Building, MapPin, Globe, ExternalLink } from "lucide-react";
+import { Search as SearchIcon, Plus, Trash2, Building, MapPin, ExternalLink } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useSaveSearch } from "@/hooks/useSaveSearch";
 import { useSaveJob } from "@/hooks/useSaveJob";
+import { useJobSearch } from "@/hooks/useJobSearch";
 import { toast } from "sonner";
-
-// Mock job data (will be replaced with actual API calls)
-const mockJobs = [
-  {
-    id: 1,
-    title: "Senior Frontend Developer",
-    company: "TechGlobal Inc.",
-    location: "Berlin, Germany",
-    remote: true,
-    jobType: "Full-time",
-    visaSponsored: true,
-    postedDate: "2025-03-28",
-    url: "#",
-    description: "We're looking for an experienced Frontend Developer to join our team. We offer visa sponsorship for the right candidate."
-  },
-  {
-    id: 2,
-    title: "Backend Engineer",
-    company: "DataSync Ltd",
-    location: "Amsterdam, Netherlands",
-    remote: false,
-    jobType: "Full-time",
-    visaSponsored: true,
-    postedDate: "2025-04-05",
-    url: "#",
-    description: "Join our backend team to work on scalable systems. Visa sponsorship available for qualified candidates."
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "InnovateTech",
-    location: "Stockholm, Sweden",
-    remote: true,
-    jobType: "Full-time",
-    visaSponsored: true,
-    postedDate: "2025-04-10",
-    url: "#",
-    description: "Lead product development in our fast-growing startup. We provide work permit assistance for international candidates."
-  },
-  {
-    id: 4,
-    title: "DevOps Engineer",
-    company: "CloudNet Systems",
-    location: "Toronto, Canada",
-    remote: false,
-    jobType: "Full-time",
-    visaSponsored: true,
-    postedDate: "2025-04-08",
-    url: "#",
-    description: "Join our DevOps team. Eligible for Canadian work visa sponsorship."
-  },
-  {
-    id: 5,
-    title: "UX/UI Designer",
-    company: "DesignHub",
-    location: "Sydney, Australia",
-    remote: true,
-    jobType: "Contract",
-    visaSponsored: true,
-    postedDate: "2025-04-02",
-    url: "#",
-    description: "Looking for creative designers. Sponsorship for Australian work visa possible."
-  }
-];
+import { ExportButton } from "@/components/dashboard/ExportButton";
 
 const Search = () => {
   const { user } = useAuth();
   const saveSearch = useSaveSearch();
   const saveJob = useSaveJob();
+  const { search, results, isLoading } = useJobSearch();
 
   const [jobUrls, setJobUrls] = useState<string[]>([""]);
   const [jobTitle, setJobTitle] = useState("");
@@ -97,8 +36,7 @@ const Search = () => {
   const [remote, setRemote] = useState(false);
   const [fullTime, setFullTime] = useState(true);
   const [partTime, setPartTime] = useState(false);
-  const [searchResults, setSearchResults] = useState<typeof mockJobs | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [sortOrder, setSortOrder] = useState("newest");
 
   const addJobUrl = () => {
     setJobUrls([...jobUrls, ""]);
@@ -121,29 +59,19 @@ const Search = () => {
       return;
     }
 
-    setIsSearching(true);
-    
-    // Save search if user is logged in
-    if (user) {
-      saveSearch.mutate({
-        jobTitle,
-        location,
-        visaOnly,
-        remote,
-        fullTime,
-        partTime,
-        jobUrls: jobUrls.filter(url => url.trim() !== "")
-      });
-    }
-    
-    // Simulate API call with a timeout
-    setTimeout(() => {
-      setSearchResults(mockJobs);
-      setIsSearching(false);
-    }, 2000);
+    // Execute the job search
+    search({
+      jobTitle,
+      location,
+      visaOnly,
+      remote,
+      fullTime,
+      partTime,
+      jobUrls: jobUrls.filter(url => url.trim() !== "")
+    });
   };
 
-  const handleSaveJob = (job: typeof mockJobs[0]) => {
+  const handleSaveJob = (job: typeof results[0]) => {
     if (!user) {
       toast.error("Please log in to save jobs");
       return;
@@ -161,6 +89,22 @@ const Search = () => {
       postedDate: job.postedDate
     });
   };
+
+  const sortedResults = [...results].sort((a, b) => {
+    switch (sortOrder) {
+      case "newest":
+        return new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime();
+      case "oldest":
+        return new Date(a.postedDate).getTime() - new Date(b.postedDate).getTime();
+      case "relevant":
+        // Simple relevance based on title match (could be improved)
+        const aMatches = a.title.toLowerCase().includes(jobTitle.toLowerCase()) ? 1 : 0;
+        const bMatches = b.title.toLowerCase().includes(jobTitle.toLowerCase()) ? 1 : 0;
+        return bMatches - aMatches;
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -286,9 +230,9 @@ const Search = () => {
                 <Button 
                   className="w-full" 
                   onClick={handleSearch}
-                  disabled={isSearching}
+                  disabled={isLoading}
                 >
-                  {isSearching ? (
+                  {isLoading ? (
                     <>Searching...</>
                   ) : (
                     <>
@@ -307,16 +251,18 @@ const Search = () => {
             </div>
             
             {/* Search Results */}
-            {searchResults && (
+            {results.length > 0 && (
               <div className="bg-card rounded-xl shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold">
-                    Search Results ({searchResults.length})
+                    Search Results ({results.length})
                   </h2>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export CSV
-                  </Button>
+                  <ExportButton 
+                    jobs={results} 
+                    type="search" 
+                    variant="outline" 
+                    size="sm"
+                  />
                 </div>
                 
                 <Tabs defaultValue="cards">
@@ -326,7 +272,7 @@ const Search = () => {
                       <TabsTrigger value="table">Table</TabsTrigger>
                     </TabsList>
                     
-                    <Select defaultValue="newest">
+                    <Select value={sortOrder} onValueChange={setSortOrder}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
@@ -339,7 +285,7 @@ const Search = () => {
                   </div>
                   
                   <TabsContent value="cards" className="space-y-4">
-                    {searchResults.map((job) => (
+                    {sortedResults.map((job) => (
                       <div key={job.id} className="bg-muted/30 rounded-lg p-4 hover:bg-muted/50 transition-colors">
                         <div className="flex justify-between items-start">
                           <div>
@@ -422,7 +368,7 @@ const Search = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                          {searchResults.map((job) => (
+                          {sortedResults.map((job) => (
                             <tr key={job.id} className="hover:bg-muted/20 transition-colors">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="font-medium">{job.title}</div>
