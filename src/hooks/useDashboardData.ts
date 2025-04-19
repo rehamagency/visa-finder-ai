@@ -1,7 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import type { SavedJob, JobStatus } from "@/types/job";
 
 export interface SavedJob {
   id: string;
@@ -66,10 +66,9 @@ export const useDashboardData = () => {
 
       if (error) throw error;
       
-      // Set default status if not present
       return data.map(job => ({
         ...job,
-        status: job.status || "Saved" // Provide default status if not set
+        status: (job.status as JobStatus) || "Saved"
       }));
     },
     enabled: !!user,
@@ -88,7 +87,6 @@ export const useDashboardData = () => {
 
       if (error) throw error;
       
-      // Transform data to match SavedSearch interface
       return data.map(search => ({
         id: search.id,
         user_id: search.user_id,

@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./components/AuthProvider";
+import Layout from "./components/Layout";
 
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -12,7 +13,6 @@ import Pricing from "./pages/Pricing";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
@@ -20,13 +20,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Layout><Index /></Layout>} />
+          <Route path="/dashboard" element={<Layout requireAuth><Dashboard /></Layout>} />
+          <Route path="/search" element={<Layout><Search /></Layout>} />
+          <Route path="/auth" element={<Layout><Auth /></Layout>} />
+          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+          <Route path="/admin" element={<Layout requireAuth><Admin /></Layout>} />
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
         <Toaster />
       </AuthProvider>
