@@ -10,9 +10,12 @@ export const useUpdateJobStatus = () => {
 
   return useMutation({
     mutationFn: async ({ jobId, status }: { jobId: string, status: JobStatus }) => {
+      // Explicitly declare the update object type
+      const updateData: { status: JobStatus } = { status };
+      
       const { data, error } = await supabase
         .from("saved_jobs")
-        .update({ status })
+        .update(updateData)
         .eq("id", jobId)
         .select()
         .single();

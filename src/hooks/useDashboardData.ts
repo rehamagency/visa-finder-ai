@@ -17,7 +17,7 @@ export interface SavedJob {
   date_posted: string;
   date_saved: string;
   notes: string;
-  status: string;
+  status: string;  // Added status property to interface
 }
 
 export interface SavedSearch {
@@ -87,7 +87,27 @@ export const useDashboardData = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Transform data to match SavedSearch interface
+      return data.map(search => ({
+        id: search.id,
+        user_id: search.user_id,
+        name: search.name || search.job_title,
+        job_title: search.job_title,
+        location: search.location,
+        results: 0, // Default value
+        date: search.created_at,
+        params: {
+          jobTitle: search.job_title,
+          location: search.location,
+          visaOnly: search.visa_only || false,
+          remote: search.remote || false,
+          fullTime: search.full_time || false,
+          partTime: search.part_time || false
+        },
+        created_at: search.created_at,
+        last_run: search.last_run
+      }));
     },
     enabled: !!user,
   });
@@ -120,7 +140,7 @@ export const useDashboardData = () => {
   return {
     savedJobs: savedJobsQuery.data || [],
     savedSearches: savedSearchesQuery.data || [],
-    userProfile: userProfileQuery.data,
+    profile: userProfileQuery.data, // Renamed from userProfile to profile to match usage
     isLoading: savedJobsQuery.isLoading || savedSearchesQuery.isLoading || userProfileQuery.isLoading,
     isError: savedJobsQuery.isError || savedSearchesQuery.isError || userProfileQuery.isError,
     error: savedJobsQuery.error || savedSearchesQuery.error || userProfileQuery.error,
