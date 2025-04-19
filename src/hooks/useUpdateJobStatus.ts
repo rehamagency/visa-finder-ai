@@ -12,7 +12,7 @@ export const useUpdateJobStatus = () => {
     mutationFn: async ({ jobId, status }: { jobId: string, status: JobStatus }) => {
       const { error } = await supabase
         .from("saved_jobs")
-        .update({ status })
+        .update({ status: status })
         .eq("id", jobId);
 
       if (error) throw error;

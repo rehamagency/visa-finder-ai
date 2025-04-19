@@ -32,7 +32,7 @@ export const exportJobsToCSV = (jobs: SavedJob[] | SearchResult[], type: 'saved'
         `"${savedJob.job_title}"`,
         `"${savedJob.company}"`,
         `"${savedJob.location}"`,
-        savedJob.status,
+        savedJob.status || "Saved",
         new Date(savedJob.date_saved).toLocaleDateString(),
         savedJob.url
       ];

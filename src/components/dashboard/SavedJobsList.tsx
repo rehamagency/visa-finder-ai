@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building, MapPin, ExternalLink } from "lucide-react";
 import type { SavedJob } from "@/hooks/useDashboardData";
+import { JobStatusSelector } from "./JobStatusSelector";
 
 interface SavedJobsListProps {
   jobs: SavedJob[];
@@ -37,15 +38,12 @@ export const SavedJobsList = ({ jobs, isCompact = false }: SavedJobsListProps) =
                 </div>
               </div>
               <div className="flex items-center">
-                <span 
-                  className={`text-xs px-2 py-0.5 rounded-full mr-2
-                    ${job.status === "Applied" ? "bg-primary/10 text-primary" : 
-                      job.status === "Interview" ? "bg-accent/10 text-accent" : 
-                      "bg-muted text-muted-foreground"}`}
-                >
-                  {job.status}
-                </span>
-                <Button variant="ghost" size="sm" asChild>
+                <JobStatusSelector 
+                  jobId={job.id} 
+                  currentStatus={(job.status || "Saved") as "Saved" | "Applied" | "Interview" | "Offer" | "Rejected"} 
+                  size="sm"
+                />
+                <Button variant="ghost" size="sm" asChild className="ml-2">
                   <a href={job.url} target="_blank" rel="noreferrer">
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -56,7 +54,7 @@ export const SavedJobsList = ({ jobs, isCompact = false }: SavedJobsListProps) =
           {isCompact && jobs.length > 3 && (
             <div className="pt-2">
               <Button variant="outline" size="sm" className="w-full" asChild>
-                <a href="/jobs">View All Jobs</a>
+                <a href="/dashboard">View All Jobs</a>
               </Button>
             </div>
           )}

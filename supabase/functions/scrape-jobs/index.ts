@@ -28,8 +28,8 @@ serve(async (req) => {
     }
 
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") || "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { global: { headers: { Authorization: authHeader } } }
     );
 
@@ -89,6 +89,7 @@ serve(async (req) => {
         remote: remote || false,
         url: "https://example.com/job1",
         date_posted: new Date().toISOString(),
+        status: "Saved"
       },
       {
         job_title: "Backend Developer",
@@ -100,6 +101,7 @@ serve(async (req) => {
         remote: remote || false,
         url: "https://example.com/job2",
         date_posted: new Date().toISOString(),
+        status: "Saved"
       },
       {
         job_title: jobTitle || "Full Stack Developer",
@@ -111,6 +113,7 @@ serve(async (req) => {
         remote: remote || true,
         url: "https://example.com/job3",
         date_posted: new Date().toISOString(),
+        status: "Saved"
       }
     ];
 

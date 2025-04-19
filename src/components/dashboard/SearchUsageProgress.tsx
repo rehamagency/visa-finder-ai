@@ -1,37 +1,52 @@
 
 import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/components/AuthProvider";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { UserProfile } from "@/hooks/useDashboardData";
+import { Link } from "react-router-dom";
 
 interface SearchUsageProgressProps {
-  profile: UserProfile;
+  profile: UserProfile | null;
 }
 
 export const SearchUsageProgress = ({ profile }: SearchUsageProgressProps) => {
-  const { user } = useAuth();
+  if (!profile) return null;
   
-  if (!user || !profile) return null;
-  
-  const { searches_used, total_searches_allowed } = profile;
-  const usagePercentage = (searches_used / total_searches_allowed) * 100;
+  const { searches_used, total_searches_allowed, subscription_tier } = profile;
+  const usagePercentage = Math.min(Math.round((searches_used / total_searches_allowed) * 100), 100);
+  const isPremium = subscription_tier !== 'free';
   
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">Search Usage</span>
-        <span className="font-medium">{searches_used} of {total_searches_allowed}</span>
-      </div>
-      <Progress value={usagePercentage} className="h-2" />
-      {usagePercentage >= 80 && (
-        <p className="text-xs text-amber-500">
-          You're almost at your search limit. Consider upgrading to our premium plan for unlimited searches.
-        </p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Search Usage</CardTitle>
+        <CardDescription>
+          {isPremium ? 'Premium searches available this month' : 'Free searches remaining'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <Progress 
+            value={usagePercentage} 
+            className="h-2" 
+          />
+          <div className="flex justify-between text-sm">
+            <span>
+              <strong>{searches_used}</strong> used
+            </span>
+            <span>
+              <strong>{total_searches_allowed}</strong> total
+            </span>
+          </div>
+        </div>
+      </CardContent>
+      {!isPremium && (
+        <CardFooter>
+          <Button asChild className="w-full">
+            <Link to="/pricing">Upgrade for Unlimited Searches</Link>
+          </Button>
+        </CardFooter>
       )}
-      {usagePercentage >= 100 && (
-        <p className="text-xs text-destructive">
-          You've reached your search limit. <a href="/pricing" className="font-medium underline">Upgrade now</a> to continue searching.
-        </p>
-      )}
-    </div>
+    </Card>
   );
 };
