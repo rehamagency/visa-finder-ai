@@ -6,13 +6,25 @@ import { supabase } from "@/integrations/supabase/client";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, session: null });
+const AuthContext = createContext<AuthContextType>({ 
+  user: null, 
+  session: null,
+  signOut: async () => {} 
+});
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -35,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session }}>
+    <AuthContext.Provider value={{ user, session, signOut }}>
       {children}
     </AuthContext.Provider>
   );

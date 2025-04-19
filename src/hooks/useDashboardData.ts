@@ -2,7 +2,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import type { SavedJob, JobStatus } from "@/types/job";
+import type { JobStatus } from "@/types/job";
+
+export interface SavedJob {
+  id: string;
+  user_id: string;
+  job_title: string;
+  company: string;
+  location: string;
+  description: string;
+  job_type: string;
+  visa_sponsored: boolean;
+  remote: boolean;
+  url: string;
+  date_posted: string;
+  date_saved: string;
+  notes: string;
+  status: JobStatus;
+}
 
 export interface SavedSearch {
   id: string;
