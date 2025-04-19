@@ -1,24 +1,8 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import type { SavedJob, JobStatus } from "@/types/job";
-
-export interface SavedJob {
-  id: string;
-  user_id: string;
-  job_title: string;
-  company: string;
-  location: string;
-  description: string;
-  job_type: string;
-  visa_sponsored: boolean;
-  remote: boolean;
-  url: string;
-  date_posted: string;
-  date_saved: string;
-  notes: string;
-  status: string;  // Added status property to interface
-}
 
 export interface SavedSearch {
   id: string;
@@ -66,6 +50,7 @@ export const useDashboardData = () => {
 
       if (error) throw error;
       
+      // Transform the data to include status field
       return data.map(job => ({
         ...job,
         status: (job.status as JobStatus) || "Saved"
@@ -138,7 +123,7 @@ export const useDashboardData = () => {
   return {
     savedJobs: savedJobsQuery.data || [],
     savedSearches: savedSearchesQuery.data || [],
-    profile: userProfileQuery.data, // Renamed from userProfile to profile to match usage
+    profile: userProfileQuery.data,
     isLoading: savedJobsQuery.isLoading || savedSearchesQuery.isLoading || userProfileQuery.isLoading,
     isError: savedJobsQuery.isError || savedSearchesQuery.isError || userProfileQuery.isError,
     error: savedJobsQuery.error || savedSearchesQuery.error || userProfileQuery.error,

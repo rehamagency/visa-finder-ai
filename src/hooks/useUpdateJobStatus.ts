@@ -9,6 +9,7 @@ export const useUpdateJobStatus = () => {
 
   return useMutation({
     mutationFn: async ({ jobId, status }: { jobId: string, status: JobStatus }) => {
+      // We need to update the database schema to include the status field
       const { data, error } = await supabase
         .from("saved_jobs")
         .update({ status })

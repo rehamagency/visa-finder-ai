@@ -3,26 +3,28 @@ import { Link } from "react-router-dom";
 import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-background border-t border-border py-12">
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-gradient">Reham Job AI Agent</h3>
+            <h3 className="text-xl font-bold text-gradient">JobAgent AI</h3>
             <p className="text-muted-foreground">
               Intelligent job search automation for visa-sponsored positions globally.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-foreground/70 hover:text-primary transition">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition" aria-label="GitHub">
                 <Github size={20} />
               </a>
-              <a href="#" className="text-foreground/70 hover:text-primary transition">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition" aria-label="Twitter">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-foreground/70 hover:text-primary transition">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-primary transition" aria-label="LinkedIn">
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="text-foreground/70 hover:text-primary transition">
+              <a href="mailto:contact@jobagent.ai" className="text-foreground/70 hover:text-primary transition" aria-label="Email">
                 <Mail size={20} />
               </a>
             </div>
@@ -63,7 +65,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/career" className="text-muted-foreground hover:text-primary transition">
+                <Link to="/careers" className="text-muted-foreground hover:text-primary transition">
                   Careers
                 </Link>
               </li>
@@ -94,7 +96,7 @@ const Footer = () => {
         
         <div className="mt-12 pt-6 border-t border-border text-center">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Reham Job AI Agent. All rights reserved.
+            © {currentYear} JobAgent AI. All rights reserved.
           </p>
         </div>
       </div>
