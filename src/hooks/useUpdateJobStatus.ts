@@ -3,20 +3,22 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type JobStatus = "Saved" | "Applied" | "Interview" | "Offer" | "Rejected";
+export type JobStatus = "Saved" | "Applied" | "Interview" | "Offer" | "Rejected";
 
 export const useUpdateJobStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ jobId, status }: { jobId: string, status: JobStatus }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("saved_jobs")
-        .update({ status: status })
-        .eq("id", jobId);
+        .update({ status })
+        .eq("id", jobId)
+        .select()
+        .single();
 
       if (error) throw error;
-      return { jobId, status };
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["savedJobs"] });

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell } from "lucide-react";
 import type { SavedSearch } from "@/hooks/useDashboardData";
+import { SearchStats } from "./SearchStats";
 
 interface SavedSearchesListProps {
   searches: SavedSearch[];
@@ -25,14 +26,9 @@ export const SavedSearchesList = ({ searches, isCompact = false }: SavedSearches
           {displaySearches.map((search) => (
             <div 
               key={search.id} 
-              className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors"
+              className="flex justify-between items-start p-3 rounded-md hover:bg-muted/50 transition-colors"
             >
-              <div>
-                <h3 className="font-medium">{search.name || search.job_title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {search.results} results • {new Date(search.date).toLocaleDateString()}
-                </p>
-              </div>
+              <SearchStats search={search} />
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm">
                   <Bell className="h-4 w-4 mr-2" />

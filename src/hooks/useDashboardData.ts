@@ -17,7 +17,7 @@ export interface SavedJob {
   date_posted: string;
   date_saved: string;
   notes: string;
-  status: string; // Add status field
+  status: string;
 }
 
 export interface SavedSearch {
@@ -26,11 +26,16 @@ export interface SavedSearch {
   name: string;
   job_title: string;
   location: string;
-  visa_only: boolean;
-  remote: boolean;
-  full_time: boolean;
-  part_time: boolean;
-  job_urls: string[];
+  results: number;
+  date: string;
+  params: {
+    jobTitle: string;
+    location: string;
+    visaOnly: boolean;
+    remote: boolean;
+    fullTime: boolean;
+    partTime: boolean;
+  };
   created_at: string;
   last_run: string;
 }
