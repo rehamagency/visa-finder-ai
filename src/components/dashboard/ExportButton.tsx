@@ -1,35 +1,36 @@
 
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { exportJobsToCSV, SearchResult } from "@/utils/csvExport";
+import { exportJobsToCSV } from "@/utils/csvExport";
 import { SavedJob } from "@/types/job";
+import { SearchResult } from "@/utils/csvExport";
+import { Download } from "lucide-react";
 
 interface ExportButtonProps {
   jobs: SavedJob[] | SearchResult[];
-  type?: 'saved' | 'search';
-  variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
+  type: 'saved' | 'search';
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  className?: string;
 }
 
 export const ExportButton = ({ 
   jobs, 
-  type = 'saved',
-  variant = "outline", 
-  size = "sm",
-  className = ""
+  type, 
+  variant = "default",
+  size = "default"
 }: ExportButtonProps) => {
+  if (!jobs || jobs.length === 0) {
+    return null;
+  }
+
   const handleExport = () => {
     exportJobsToCSV(jobs, type);
   };
 
   return (
-    <Button 
-      variant={variant} 
-      size={size} 
+    <Button
+      variant={variant}
+      size={size}
       onClick={handleExport}
-      className={className}
-      disabled={!jobs || jobs.length === 0}
     >
       <Download className="h-4 w-4 mr-2" />
       Export to CSV

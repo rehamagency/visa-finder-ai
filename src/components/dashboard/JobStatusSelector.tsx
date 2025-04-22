@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useUpdateJobStatus } from "@/hooks/useUpdateJobStatus";
-
-type JobStatus = "Saved" | "Applied" | "Interview" | "Offer" | "Rejected";
+import type { JobStatus } from "@/types/job";
 
 interface JobStatusSelectorProps {
   jobId: string;
@@ -49,7 +48,6 @@ export const JobStatusSelector = ({
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline"
-
           size={size} 
           className={cn(
             "justify-between font-normal",
