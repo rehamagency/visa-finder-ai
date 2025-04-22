@@ -11,6 +11,7 @@ import { SearchStats } from "@/components/dashboard/SearchStats";
 import { SearchUsageProgress } from "@/components/dashboard/SearchUsageProgress";
 import { SavedJobFilters } from "@/components/dashboard/SavedJobFilters";
 import { ExportButton } from "@/components/dashboard/ExportButton";
+import { JobDetails } from "@/components/dashboard/JobDetails";
 import { JobStatus, SavedJob } from "@/types/job";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ const Dashboard = () => {
   
   const [filteredJobs, setFilteredJobs] = useState<SavedJob[]>([]);
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [selectedJob, setSelectedJob] = useState<SavedJob | null>(null);
 
   // Apply initial filtering
   useEffect(() => {
@@ -77,6 +79,10 @@ const Dashboard = () => {
     });
 
     setFilteredJobs(filtered);
+  };
+
+  const handleViewJobDetails = (job: SavedJob) => {
+    setSelectedJob(job);
   };
 
   if (isLoading) {
@@ -205,14 +211,22 @@ const Dashboard = () => {
                           <div>
                             {job.notes && (
                               <div className="text-sm italic text-muted-foreground">
-                                "{job.notes}"
+                                "{job.notes.length > 100 ? `${job.notes.substring(0, 100)}...` : job.notes}"
                               </div>
                             )}
                           </div>
                           <div className="flex space-x-2">
+                            <JobStatusSelector 
+                              jobId={job.id} 
+                              currentStatus={(job.status || "Saved") as "Saved" | "Applied" | "Interview" | "Offer" | "Rejected"} 
+                              size="sm"
+                            />
+                            <Button variant="outline" size="sm" onClick={() => handleViewJobDetails(job)}>
+                              View Details
+                            </Button>
                             <Button variant="ghost" size="sm" asChild>
                               <a href={job.url || "#"} target="_blank" rel="noreferrer">
-                                View Job
+                                Apply
                               </a>
                             </Button>
                           </div>
@@ -253,6 +267,14 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {selectedJob && (
+        <JobDetails 
+          job={selectedJob} 
+          isOpen={!!selectedJob} 
+          onClose={() => setSelectedJob(null)} 
+        />
+      )}
     </div>
   );
 };

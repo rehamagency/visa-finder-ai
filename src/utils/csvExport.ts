@@ -21,7 +21,7 @@ export const exportJobsToCSV = (jobs: SavedJob[] | SearchResult[], type: 'saved'
 
   // Define CSV headers based on type
   const headers = type === 'saved' 
-    ? ["Job Title", "Company", "Location", "Status", "Date Saved", "Application URL"]
+    ? ["Job Title", "Company", "Location", "Status", "Date Saved", "Application URL", "Job Type", "Remote", "Visa Sponsored", "Notes"]
     : ["Job Title", "Company", "Location", "Job Type", "Remote", "Visa Sponsored", "Date Posted", "Application URL"];
 
   // Convert jobs data to CSV format
@@ -31,21 +31,25 @@ export const exportJobsToCSV = (jobs: SavedJob[] | SearchResult[], type: 'saved'
       return [
         `"${savedJob.job_title}"`,
         `"${savedJob.company}"`,
-        `"${savedJob.location}"`,
+        `"${savedJob.location || 'Not specified'}"`,
         savedJob.status || "Saved",
         new Date(savedJob.date_saved).toLocaleDateString(),
-        savedJob.url
+        savedJob.url || "",
+        savedJob.job_type || "Not specified",
+        savedJob.remote ? "Yes" : "No",
+        savedJob.visa_sponsored ? "Yes" : "No",
+        `"${(savedJob.notes || "").replace(/"/g, '""')}"`
       ];
     } else {
       const searchResult = job as SearchResult;
       return [
         `"${searchResult.title}"`,
         `"${searchResult.company}"`,
-        `"${searchResult.location}"`,
-        searchResult.jobType || "",
+        `"${searchResult.location || 'Not specified'}"`,
+        searchResult.jobType || "Not specified",
         searchResult.remote ? "Yes" : "No",
         searchResult.visaSponsored ? "Yes" : "No",
-        new Date(searchResult.postedDate).toLocaleDateString(),
+        searchResult.postedDate ? new Date(searchResult.postedDate).toLocaleDateString() : "Not specified",
         searchResult.url || ""
       ];
     }
@@ -65,9 +69,10 @@ export const exportJobsToCSV = (jobs: SavedJob[] | SearchResult[], type: 'saved'
   const link = document.createElement("a");
   link.setAttribute("href", url);
   
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
   const filename = type === 'saved' 
-    ? `saved_jobs_${new Date().toISOString().slice(0, 10)}.csv`
-    : `job_search_results_${new Date().toISOString().slice(0, 10)}.csv`;
+    ? `saved_jobs_${timestamp}.csv`
+    : `job_search_results_${timestamp}.csv`;
   
   link.setAttribute("download", filename);
   document.body.appendChild(link);
