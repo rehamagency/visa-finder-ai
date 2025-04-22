@@ -43,14 +43,14 @@ export const useDashboardData = () => {
 
       const { data, error } = await supabase
         .from("saved_jobs")
-        .select("*")
+        .select("id, user_id, job_title, company, location, description, job_type, visa_sponsored, remote, url, date_posted, date_saved, notes, status")
         .eq("user_id", user.id)
         .order("date_saved", { ascending: false });
 
       if (error) throw error;
-      
-      // Transform the data to include status field with default value if not present
-      return data.map(job => ({
+
+      // Hydrate missing status for legacy rows
+      return data.map((job) => ({
         ...job,
         status: (job.status as JobStatus) || "Saved"
       }));

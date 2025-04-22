@@ -57,6 +57,7 @@ export type Database = {
           location: string | null
           notes: string | null
           remote: boolean | null
+          status: string | null
           url: string | null
           user_id: string
           visa_sponsored: boolean | null
@@ -72,6 +73,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           remote?: boolean | null
+          status?: string | null
           url?: string | null
           user_id: string
           visa_sponsored?: boolean | null
@@ -87,6 +89,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           remote?: boolean | null
+          status?: string | null
           url?: string | null
           user_id?: string
           visa_sponsored?: boolean | null

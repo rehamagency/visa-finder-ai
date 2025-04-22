@@ -22,6 +22,7 @@ const Layout = ({ children, requireAuth = false }: LayoutProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Only render Navbar and Footer here, never inside children! */}
       <Navbar />
       <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {children}

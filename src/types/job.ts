@@ -15,7 +15,7 @@ export interface SavedJob {
   date_posted: string;
   date_saved: string;
   notes: string;
-  status: JobStatus;
+  status?: JobStatus; // Now optional for legacy jobs
 }
 
 export interface JobSearchParams {
