@@ -1,5 +1,5 @@
 
-import { SavedJob } from "@/hooks/useDashboardData";
+import { SavedJob } from "@/types/job";
 
 export interface SearchResult {
   id: number | string;

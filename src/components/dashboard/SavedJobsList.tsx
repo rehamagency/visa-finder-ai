@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building, MapPin, ExternalLink } from "lucide-react";
-import type { SavedJob } from "@/hooks/useDashboardData";
+import type { SavedJob } from "@/types/job";
 import { JobStatusSelector } from "./JobStatusSelector";
 
 interface SavedJobsListProps {

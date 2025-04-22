@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { exportJobsToCSV, SearchResult } from "@/utils/csvExport";
-import { SavedJob } from "@/hooks/useDashboardData";
+import { SavedJob } from "@/types/job";
 
 interface ExportButtonProps {
   jobs: SavedJob[] | SearchResult[];

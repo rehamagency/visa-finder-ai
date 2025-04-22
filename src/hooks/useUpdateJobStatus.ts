@@ -12,7 +12,9 @@ export const useUpdateJobStatus = () => {
       // Update the job status in the database
       const { data, error } = await supabase
         .from("saved_jobs")
-        .update({ status })
+        .update({ 
+          status: status // Make sure this matches the column name in Supabase
+        })
         .eq("id", jobId)
         .select()
         .single();
@@ -22,7 +24,7 @@ export const useUpdateJobStatus = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["savedJobs"] });
-      toast.success(`Job status updated to ${data.status}`);
+      toast.success(`Job status updated to ${data.status || 'new status'}`);
     },
     onError: (error) => {
       console.error("Error updating job status:", error);
