@@ -19,7 +19,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Trash, Plus, Search } from "lucide-react";
 import { useJobSearch } from "@/hooks/useJobSearch";
 import { useSaveSearch } from "@/hooks/useSaveSearch";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import type { JobSearchParams } from "@/types/job";
 
 // Define validation schema for search form
 const searchFormSchema = z.object({
@@ -82,8 +83,14 @@ export const SearchForm = ({ onSearchComplete, initialValues }: SearchFormProps)
     try {
       // Filter out empty URLs
       const cleanedJobUrls = data.jobUrls.filter(url => url.trim() !== "");
-      const searchParams = {
-        ...data,
+      
+      const searchParams: JobSearchParams = {
+        jobTitle: data.jobTitle,
+        location: data.location,
+        visaOnly: data.visaOnly,
+        remote: data.remote,
+        fullTime: data.fullTime,
+        partTime: data.partTime,
         jobUrls: cleanedJobUrls
       };
       
@@ -91,14 +98,14 @@ export const SearchForm = ({ onSearchComplete, initialValues }: SearchFormProps)
       const response = await search(searchParams);
       
       // Save the search for future reference
-      saveSearch.mutate(searchParams);
+      await saveSearch.mutateAsync(searchParams);
       
       // Pass the results back to the parent component
-      onSearchComplete(response.results);
+      onSearchComplete(response);
       
       toast({
         title: "Search completed",
-        description: `Found ${response.results.length} matching jobs`,
+        description: `Found ${response.length} matching jobs`,
       });
     } catch (error: any) {
       toast({

@@ -97,7 +97,22 @@ export const SearchResults = ({ results, isLoading }: SearchResultsProps) => {
         <h2 className="text-xl font-bold">
           Search Results ({results.length} jobs)
         </h2>
-        <ExportButton jobs={results} type="search" variant="outline" />
+        <ExportButton jobs={results.map(job => ({
+          job_title: job.title,
+          company: job.company,
+          location: job.location || '',
+          description: job.description || '',
+          job_type: job.jobType || '',
+          visa_sponsored: job.visaSponsored,
+          remote: job.remote,
+          url: job.url,
+          date_posted: job.postedDate || '',
+          date_saved: new Date().toISOString(),
+          id: job.id,
+          user_id: '', // This will be set by the backend
+          notes: '',
+          status: 'Saved'
+        }))} type="search" variant="outline" />
       </div>
 
       <div className="space-y-4">

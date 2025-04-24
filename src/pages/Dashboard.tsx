@@ -12,6 +12,7 @@ import { SearchUsageProgress } from "@/components/dashboard/SearchUsageProgress"
 import { SavedJobFilters } from "@/components/dashboard/SavedJobFilters";
 import { ExportButton } from "@/components/dashboard/ExportButton";
 import { JobDetails } from "@/components/dashboard/JobDetails";
+import { JobStatusSelector } from "@/components/dashboard/JobStatusSelector";
 import { JobStatus, SavedJob } from "@/types/job";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
